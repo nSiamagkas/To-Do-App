@@ -4,7 +4,7 @@ const addBtn = document.getElementById("add-btn");
 const todoList = document.getElementById("todo-list");
 const themeToggle = document.getElementById("toggle-theme");
 const filters = document.querySelectorAll(".filters button");
-let todos = JSON.parse(localStorage.getItem("todos"));
+let todos = JSON.parse(localStorage.getItem("todos")) || [];
 let currentFilter = "All";
 
 const saveTodos = () => {
