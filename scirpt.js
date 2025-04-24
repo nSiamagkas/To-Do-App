@@ -13,6 +13,7 @@ const saveTodos = () => {
 
 const renderTodos = () => {
   todoList.innerHTML = "";
+
   filters.forEach((btn) => btn.classList.remove("active"));
   const activeBtn = Array.from(filters).find(
     (btn) => btn.dataset.filter === currentFilter
@@ -73,47 +74,88 @@ const renderTodos = () => {
     li.appendChild(delBtn);
     todoList.appendChild(li);
   });
+
+  const emptyMsg = document.getElementById("empty-msg");
+
+  if (filtered.length === 0) {
+    let msg = "";
+    if (currentFilter === "Active") {
+      msg = "No active tasks ";
+    } else if (currentFilter === "Completed") {
+      msg = "No tasks have been completed yet ";
+    } else {
+      msg = "No tasks given yet ";
+    }
+
+    emptyMsg.textContent = msg;
+    emptyMsg.style.display = "block";
+  } else {
+    emptyMsg.style.display = "none";
+  }
 };
 
-const addTodo = () => {
-  const text = todoInput.value.trim();
-  const due = dueDateInput.value;
-  if (text === "") return;
-  todos.push({ id: Date.now(), text: text, due: due, completed: false });
-  todoInput.value = "";
-  dueDateInput.value = "";
-  saveTodos();
-  renderTodos();
-};
-
-addBtn.onclick = addTodo;
-
-todoInput.addEventListener("keydown", function (e) {
-  if (e.key === "Enter") {
-    addTodo();
+const quote = document.getElementById("quote");
+async function fetchQuote() {
+  try {
+    const response = await fetch("https://api.breakingbadquotes.xyz/v1/quotes");
+    if (!response.ok) {
+      throw new Error("Network response was not ok " + response.statusText);
+    }
+    const data = await response.json();
+    quote.textContent = `"${data[0].quote}" - ${data[0].author}`;
+  } catch (error) {
+    console.error("Error fetching quote:", error);
+    quote.textContent = "Failed to fetch quote. Please try again later.";
   }
-});
 
-dueDateInput.addEventListener("keydown", function (e) {
-  if (e.key === "Enter") {
-    addTodo();
-  }
-});
-
-filters.forEach(function (btn) {
-  btn.onclick = function () {
-    currentFilter = btn.dataset.filter;
+  const addTodo = () => {
+    const text = todoInput.value.trim();
+    const due = dueDateInput.value;
+    if (text === "") {
+      alert("Please enter a task item.");
+      return;
+    }
+    if (due === "") {
+      alert("Please enter a due date.");
+      return;
+    }
+    todos.push({ id: Date.now(), text: text, due: due, completed: false });
+    todoInput.value = "";
+    dueDateInput.value = "";
+    saveTodos();
     renderTodos();
   };
-});
 
-themeToggle.onclick = () => {
-  document.body.classList.toggle("dark");
-  if (document.body.classList.contains("dark")) {
-    themeToggle.textContent = "☀️";
-  } else {
-    themeToggle.textContent = "🌙";
-  }
-};
+  addBtn.onclick = addTodo;
 
+  todoInput.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      addTodo();
+    }
+  });
+
+  dueDateInput.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      addTodo();
+    }
+  });
+
+  filters.forEach(function (btn) {
+    btn.onclick = function () {
+      currentFilter = btn.dataset.filter;
+      renderTodos();
+    };
+  });
+
+  themeToggle.onclick = () => {
+    document.body.classList.toggle("dark");
+    if (document.body.classList.contains("dark")) {
+      themeToggle.textContent = "☀️";
+    } else {
+      themeToggle.textContent = "🌙";
+    }
+  };
+}
+
+fetchQuote();
 renderTodos();
